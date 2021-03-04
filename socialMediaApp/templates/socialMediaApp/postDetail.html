@@ -1,0 +1,27 @@
+{% extends 'socialMediaApp/base.html' %}
+
+{% block title %}
+    Post Detail
+{% endblock %}
+
+{% block nav %}
+    <ul>
+        <li>
+            {% if foreignUser_pk %}
+                <a href="{% url 'viewProfile' foreignUser_pk  user.pk %}">Back</a>
+            {% else %}
+                <a href="{% url 'profile' user.pk %}">Back</a>
+            {% endif %}
+        </li>
+    </ul>
+{% endblock %}
+
+{% block body %}
+    <h1>{{ user.email }} Post:</h1>
+    <div>
+        <h1>Title: </h1>
+        <p>{{ object.title }}</p>
+        <h1>Description: </h1>
+        <p>{{ object.description }}</p>
+    </div>
+{% endblock %}
