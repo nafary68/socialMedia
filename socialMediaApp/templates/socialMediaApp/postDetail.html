@@ -1,0 +1,26 @@
+{% extends 'socialMediaApp/base.html' %}
+
+{% block title %}
+    Post Detail
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block body %}
+    <h1>{{ user.email }} Post:</h1>
+    <div>
+        <h1>Title: </h1>
+        <p>{{ object.title }}</p>
+        <h1>Description: </h1>
+        <p>{{ object.description }}</p>
+        <h1>Comments: </h1>
+        <div>
+            {% for comment in comments %}
+                <h3>{{ comment.user.email }} Says: </h3>
+                <p>{{ comment.body }}</p>
+            {% endfor %}
+        </div>
+        <h1>Like: {{ object.likes_count }}</h1>
+    </div>
+{% endblock %}
