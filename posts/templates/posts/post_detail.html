@@ -1,0 +1,15 @@
+{% extends 'socialMediaApp/base.html' %}
+
+{% block title %}
+<h1>detail of {{ post.title }} post</h1>
+{% endblock %}
+
+{% block body %}
+        <div class="card">
+            <p class="card-header"><a href="#">{{ post.user }}</a></p>
+            <h2 class="card-body"><a href="#">{{ post.title }}</a></h2>
+            <p class="card-body"><a href="#">{{ post.body }}</a></p>
+            <p class="card-body"><a href="#">{{ post.created }}</a></p>
+
+        </div><br/>
+{% endblock %}
