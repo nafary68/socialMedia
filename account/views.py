@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import UserRegistrationForm, UserLoginForm, EditProfileForm,PhoneLoginForm, VerifyCodeForm
-from django.contrib.auth.models import User
+from .forms import UserRegistrationForm,UserLoginForm, EditProfileForm,PhoneLoginForm, VerifyCodeForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from posts.models import Post
 from django.contrib.auth.decorators import login_required
 from random import randint
 from kavenegar import *
-from .models import Profile, Relation
+from .models import MyUser, Relation
 from django.http import JsonResponse
 
 
@@ -17,7 +16,7 @@ def user_login(request):
         form = UserLoginForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            user = authenticate(request, username=cd['username'], password=cd['password'])
+            user = authenticate(request, email=cd['email'], password=cd['password'])
             if user is not None:
                 login(request, user)
                 messages.success(request, 'you logged in successfully', 'success')
@@ -36,7 +35,7 @@ def user_register(request):
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            user = User.objects.create_user(cd['username'], cd['email'], cd['password'])
+            user = MyUser.objects.create_user(cd['email'],cd['phone'], cd['password'])
             login(request, user)
             messages.success(request, 'you registered successfully', 'success')
             return redirect('posts:all_posts')
@@ -120,7 +119,7 @@ def verify(request, phone, rand_num):
 def follow(request):
     if request.method == 'POST':
         user_id = request.POST['user_id']
-        following = get_object_or_404(User, pk=user_id)
+        following = get_object_or_404(MyUser, pk=user_id)
         check_relation = Relation.objects.filter(from_user=request.user, to_user=following)
         if check_relation.exists():
             return JsonResponse({'status': 'exists'})
@@ -133,7 +132,7 @@ def follow(request):
 def unfollow(request):
     if request.method == 'POST':
         user_id = request.POST['user_id']
-        following = get_object_or_404(User, pk=user_id)
+        following = get_object_or_404(MyUser, pk=user_id)
         check_relation = Relation.objects.filter(from_user=request.user, to_user=following)
         if check_relation.exists():
             check_relation.delete()
