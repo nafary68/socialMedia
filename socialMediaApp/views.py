@@ -1,5 +1,4 @@
 import random
-
 from django.contrib.auth import logout, authenticate
 from django.contrib.auth.models import User as DjangoUser
 from django.core.exceptions import PermissionDenied
@@ -11,7 +10,6 @@ from django.views.generic import DetailView
 from django.views.generic.base import RedirectView
 from django.views.generic.edit import FormView, FormMixin
 from kavenegar import *
-
 from socialMedia.settings import EMAIL_HOST_USER
 from .auth import myLogin
 from .forms import PostForm, SearchForm, UserSignUpForm, \
@@ -19,11 +17,12 @@ from .forms import PostForm, SearchForm, UserSignUpForm, \
 from .models import Post, User, UserJoin, Comment, Like
 
 
-# Create your views here.
+# Move to login page.
 def index(request):
     return HttpResponseRedirect(reverse_lazy('logIn'))
 
-
+#user signup
+#save the information on user model
 class UserSignUp(FormView):
     model = User
     form_class = UserSignUpForm
@@ -59,7 +58,8 @@ class UserSignUp(FormView):
         self.success_url = reverse_lazy('verificationRedirect', kwargs={'pk': user.pk})
         return super().form_valid(form)
 
-
+#Takes the basic information and gives it to the form
+#Takes new information and replaces it with old information
 class UserUpdate(FormView):
     model = User
     form_class = UserUpdateForm
@@ -96,7 +96,9 @@ class UserUpdate(FormView):
         self.success_url = reverse_lazy('profile', kwargs={"pk": self.kwargs['pk']})
         return super(UserUpdate, self).form_valid(form)
 
-
+#If a user is not logged in, this view will not work
+# Sends the required information to the template
+# Forwards the request to the searched user.
 class UserDetail(DetailView, FormMixin):
     model = User
     template_name = 'socialMediaApp/profile.html'
@@ -164,7 +166,9 @@ class ViewUserDetail(DetailView):
         self.check_if_user_is_followed(context)
         return context
 
-
+# If the user is logged in, he gives it to the template.
+#  If the user is already logged in, he logs out and logs in again
+#  If the user is not verified, he will go to the verification page
 class UserEnter(FormView):
     model = User
     form_class = UserEnterForm
@@ -189,7 +193,7 @@ class UserEnter(FormView):
             self.success_url = reverse_lazy('verificationRedirect', kwargs={'pk': user.pk})
         return super(UserEnter, self).form_valid(form)
 
-
+#create post with input information
 class PostCreate(FormView):
     model = Post
     form_class = PostForm
@@ -213,7 +217,7 @@ class PostCreate(FormView):
         context['user_pk'] = self.kwargs['pk']
         return context
 
-
+#Takes the required information from the database and gives it to the template
 class PostDetail(DetailView):
     model = Post
     template_name = 'socialMediaApp/postDetail.html'
@@ -225,7 +229,8 @@ class PostDetail(DetailView):
         context['comments'] = Comment.objects.filter(post_id=self.kwargs['post_pk'])
         return context
 
-
+#Provides the required information to the template
+#If the user has not followed the user, he will not allow the user to comment
 class ViewPostDetail(DetailView, FormMixin):
     model = Post
     template_name = 'socialMediaApp/viewPostDetail.html'
@@ -265,7 +270,8 @@ class ViewPostDetail(DetailView, FormMixin):
         context['comments'] = Comment.objects.filter(post_id=self.kwargs['post_pk'])
         return context
 
-
+#Compare the taken word piece with the users' first email and if it matches
+# json sends to template
 class AutoCompleteView(View):
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
@@ -280,7 +286,8 @@ class AutoCompleteView(View):
         mimetype = 'application/json'
         return HttpResponse(data, mimetype)
 
-
+#If the user. The user did not follow the request Save accept=false
+#Otherwise it erases the stored information
 class UserFollow(RedirectView):
     query_string = True
     pattern_name = 'viewProfile'
@@ -300,7 +307,7 @@ class UserFollow(RedirectView):
                 join.save()
             return super().get_redirect_url(*args, **kwargs)
 
-
+#accept the request accept=True
 class UserRequest(View):
     def get(self, request, *args, **kwargs):
         join = UserJoin.objects.get(user_id=self.kwargs['foreignUser_pk'],
@@ -309,7 +316,9 @@ class UserRequest(View):
         join.save()
         return HttpResponseRedirect(reverse_lazy('profile', kwargs={'pk': self.kwargs['pk']}))
 
-
+# If the user has liked that like will be deleted
+#   If the user has not followed the desired, he will not allow it
+#   Otherwise it saves like
 class UserLike(RedirectView):
     query_string = True
 
@@ -331,7 +340,7 @@ class UserLike(RedirectView):
                 return super().get_redirect_url(*args, **kwargs)
         raise PermissionDenied
 
-
+#delete the comment
 class CommentDelete(View):
     def get(self, request, *args, **kwargs):
         comment = Comment.objects.get(post_id=self.kwargs['post_pk'])
@@ -339,7 +348,7 @@ class CommentDelete(View):
         return HttpResponseRedirect(reverse_lazy('postDetail', kwargs={'pk': self.kwargs['pk'],
                                                                        'post_pk': self.kwargs['post_pk']}))
 
-
+#update post
 class PostUpdate(FormView):
     form_class = PostForm
     template_name = "socialMediaApp/updatePost.html"
@@ -367,14 +376,16 @@ class PostUpdate(FormView):
         self.success_url = reverse_lazy('postDetail', kwargs=self.kwargs)
         return super(PostUpdate, self).form_valid(form)
 
-
+#delete post
 class PostDelete(View):
     def get(self, request, *args, **kwargs):
         Post.objects.get(pk=self.kwargs['post_pk']).delete()
         return HttpResponseRedirect(reverse_lazy('profile',
                                                  kwargs={'pk': self.kwargs['pk']}))
 
-
+# If it is based on phone number, it sends sms.
+# If it is based on email, it will send an email.
+# Checks the sent code and verifies the user.
 class Verification(FormView):
     form_class = tokenForm
     template_name = 'socialMediaApp/verification.html'
@@ -418,7 +429,7 @@ class Verification(FormView):
             return super(Verification, self).form_invalid(form)
         return super(Verification, self).form_valid(form)
 
-
+# Checks what method the user wants to log in with.
 class VerificationRedirect(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         user = User.objects.get(pk=self.kwargs['pk'])
