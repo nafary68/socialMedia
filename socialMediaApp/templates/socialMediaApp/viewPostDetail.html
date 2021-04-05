@@ -1,0 +1,63 @@
+{% extends 'socialMediaApp/base.html' %}
+
+{% block title %}
+    Post Detail
+{% endblock %}
+
+{% block nav %}
+    <ul>
+        <li><a href="{% url 'signUp' %}">Sign Up</a></li>
+        <li><a href="{% url 'logIn' %}">Log In</a></li>
+    </ul>
+{% endblock %}
+
+{% block sidebar %}
+    <ul>
+        <li>
+            <a href="{% url 'profile' foreignUser_pk %}">
+                To Your Profile</a>
+        </li>
+        <li>
+            <a href="{% url 'viewProfile' foreignUser_pk object.user.pk %}">
+                To this user's profile</a>
+        </li>
+        <li>
+           <a href="{% url 'postLike' foreignUser_pk object.pk %}">
+                Like
+           </a>
+        </li>
+    </ul>
+{% endblock %}
+
+
+{% block body %}
+    <div class="postDetail">
+        <h1>{{ user.djangoUser.username }} Post:</h1>
+        <div>
+            <h1>Title: </h1>
+            <p>{{ object.title }}</p>
+            <h1>Description: </h1>
+            <p>{{ object.description }}</p>
+        </div>
+        <div>
+            <h1>Post Comment</h1>
+            <div>
+                <form action="{% url 'postComment' foreignUser_pk user.pk object.pk %}" method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" value="Send">
+                </form>
+            </div>
+            <h1>Comments: </h1>
+            <div>
+                {% for comment in comments %}
+                    <h3>{{ comment.user.djangoUser.username }} Says: </h3>
+                    <ul>
+                        <li>{{ comment.body }}</li>
+                    </ul>
+                {% endfor %}
+            </div>
+            <h1>Like Count: {{ object.likes_count }}</h1>
+        </div>
+    </div>
+{% endblock %}

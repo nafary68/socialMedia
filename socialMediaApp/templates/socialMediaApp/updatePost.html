@@ -1,0 +1,30 @@
+{% extends 'socialMediaApp/base.html' %}
+
+{% block title %}
+    Edit Post
+{% endblock %}
+
+{% block nav %}
+    <ul>
+        <li><a href="{% url 'signUp' %}">Sign Up</a></li>
+        <li><a href="{% url 'logIn' %}">Log In</a></li>
+    </ul>
+{% endblock %}
+
+
+{% block sidebar %}
+    <ul>
+        <li><a href="{% url 'postDetail' post.user.pk post.pk %}">Back to post</a></li>
+    </ul>
+{% endblock %}
+
+
+{% block body %}
+    <div class="updateProfile">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Save">
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends 'socialMediaApp/base.html' %}
+{% load timeProcess %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block nav %}
+    <ul>
+        <li><a href="{% url 'signUp' %}">Sign Up</a></li>
+        <li><a href="{% url 'logIn' %}">Log In</a></li>
+    </ul>
+{% endblock %}
+
+{% block body %}
+    <div class="profile">
+        <h2>{{ object.djangoUser.username }} Profile</h2>
+        {% if post_list|length > 0 %}
+            <h2>Posts {{ post_list|length }} :</h2>
+            <ul>
+                {% for post in post_list %}
+                <li>
+                    <a href="{% url 'postDetail' object.pk post.pk %}">
+                        {{ post.title }}
+                    </a>
+                    {% timeProcess post.date %}
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <h3>There is no post</h3>
+        {% endif %}
+        <h3>First Name: </h3>
+        <p>{{ object.firstName }}</p>
+        <h3>Last Name: </h3>
+        <p>{{ object.lastName }}</p>
+        <h3>Gender: </h3>
+        <p>{{ object.gender }}</p>
+        <h3>Bio: </h3>
+        <p>{{ object.bio }}</p>
+        <h3>Website: </h3>
+        <p>{{ object.website }}</p>
+    </div>
+    <div class="follow">
+        <div>
+            <h3>Following: </h3>
+            {% if followedUsers|length == 0 %}
+                <p>This user don't follow any user</p>
+            {% else %}
+            {% for followedUser in followedUsers %}
+                <h3>
+                    <a href="{% url 'viewProfile' object.pk followedUser.following.pk %}">
+                        {{ followedUser.following }}
+                    </a>
+                </h3>
+                <ul>
+                    {% if followedUser.following.post_set.all|length > 0 %}
+                        {% for post in followedUser.following.post_set.all %}
+                            <li>
+                                <a href="{% url 'viewPostDetail' object.pk followedUser.following.pk post.pk %}">
+                                    {{ post.title }}
+                                </a>
+                                <br/>
+                                <a href="{% url 'viewPostDetail' object.pk followedUser.following.pk post.pk %}">
+                                    <button>Comment</button>
+                                </a>
+                                <a href="{% url 'postLike' object.pk post.pk %}">
+                                    <button>Like {{ post.likes_count }}</button>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li>This user have no post.</li>
+                    {% endif %}
+                </ul>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <div>
+            <h3>Followers: </h3>
+            {% if userFollowers|length == 0 %}
+                <p>This user doesn't have any followers</p>
+            {% else %}
+                {% for userFollower in userFollowers %}
+                    <h3>
+                        <a href="{% url 'viewProfile' object.pk userFollower.user.pk %}">
+                            {{ userFollower.user }}
+                        </a>
+                    </h3>
+                    <ul>
+                        {% if userFollower.user.post_set.all|length > 0 %}
+                            {% for post in userFollower.user.post_set.all %}
+                                <li>
+                                    <a href="{% url 'viewPostDetail' object.pk userFollower.user.pk post.pk %}">
+                                        {{ post.title }}
+                                    </a>
+                                    <br/>
+                                    <a href="{% url 'viewPostDetail' object.pk userFollower.user.pk post.pk %}">
+                                        <button>Comment</button>
+                                    </a>
+                                    <a href="{% url 'postLike' object.pk post.pk %}">
+                                        <button>Like {{ post.likes_count }}</button>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li>This user have no post.</li>
+                        {% endif %}
+                    </ul>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div>
+            <h3>Requested: </h3>
+            <ul>
+                {% for request in requested %}
+                    <li>
+                        {{ request.user }}
+                        <a href="{% url 'userRequest' object.pk request.user.pk %}">Accept Request</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="search">
+        <form method="post">{% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Search">
+        </form>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script>
+            $(document).ready(function(){
+                $("#txtSearch").autocomplete({
+                    source: "/ajax_calls/search/",
+                    minLength: 2,
+                  });
+            });
+    </script>
+{% endblock %}
+
+{% block sidebar %}
+    <ul>
+        <li><a href="{% url 'createPost' object.pk %}">Add a post</a></li>
+        <li><a href="{% url 'userUpdate' object.pk %}">Edit Profile</a></li>
+    </ul>
+{% endblock %}
+
+
+
+
+
+
